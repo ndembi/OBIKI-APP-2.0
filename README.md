@@ -22,7 +22,8 @@ composer require friendsofsymfony/rest-bundle
 php bin/console make:entity (nom du Bo -> type du Bo -> longueur du Bo)
 -----------------------------------------------------------------------
 # Migration du BO dans la BDD
-php bin/console doctrine:database:create
+php bin/console doctrine:database:create (si la database n'existe pas)
+php bin/console doctrine:schema:update --force (si la database existe déjà, ajouter la table)
 php bin/console doctrine:migration:migrate
 -------------------------------------------------------------------------
 # Générer les differentes actions sur notre objet
