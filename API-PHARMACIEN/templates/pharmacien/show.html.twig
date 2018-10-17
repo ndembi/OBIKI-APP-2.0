@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pharmacien{% endblock %}
+
+{% block body %}
+    <h1>Pharmacien</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ pharmacien.id }}</td>
+            </tr>
+            <tr>
+                <th>Id_pharmacie</th>
+                <td>{{ pharmacien.idPharmacie }}</td>
+            </tr>
+            <tr>
+                <th>Siren</th>
+                <td>{{ pharmacien.siren }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ pharmacien.name }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ pharmacien.email }}</td>
+            </tr>
+            <tr>
+                <th>Address</th>
+                <td>{{ pharmacien.address }}</td>
+            </tr>
+            <tr>
+                <th>Phone</th>
+                <td>{{ pharmacien.phone }}</td>
+            </tr>
+            <tr>
+                <th>Id_ville</th>
+                <td>{{ pharmacien.idVille }}</td>
+            </tr>
+            <tr>
+                <th>Id_proprietaire</th>
+                <td>{{ pharmacien.idProprietaire }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('pharmacien_index') }}">back to list</a>
+
+    <a href="{{ path('pharmacien_edit', {'id': pharmacien.id}) }}">edit</a>
+
+    {{ include('pharmacien/_delete_form.html.twig') }}
+{% endblock %}

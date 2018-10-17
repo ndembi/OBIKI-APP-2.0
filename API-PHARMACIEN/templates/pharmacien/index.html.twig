@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pharmacien index{% endblock %}
+
+{% block body %}
+    <h1>Pharmacien index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Id_pharmacie</th>
+                <th>Siren</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Id_ville</th>
+                <th>Id_proprietaire</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for pharmacien in pharmaciens %}
+            <tr>
+                <td>{{ pharmacien.id }}</td>
+                <td>{{ pharmacien.idPharmacie }}</td>
+                <td>{{ pharmacien.siren }}</td>
+                <td>{{ pharmacien.name }}</td>
+                <td>{{ pharmacien.email }}</td>
+                <td>{{ pharmacien.address }}</td>
+                <td>{{ pharmacien.phone }}</td>
+                <td>{{ pharmacien.idVille }}</td>
+                <td>{{ pharmacien.idProprietaire }}</td>
+                <td>
+                    <a href="{{ path('pharmacien_show', {'id': pharmacien.id}) }}">show</a>
+                    <a href="{{ path('pharmacien_edit', {'id': pharmacien.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="10">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('pharmacien_new') }}">Create new</a>
+{% endblock %}
