@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Pharmacien;
 use App\Form\PharmacienType;
 use App\Repository\PharmacienRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,51 +13,58 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route("/pharmacien")
  */
-class PharmacienController extends AbstractController
+class PharmacienController extends Controller
 {
     /**
      * @Route("/", name="pharmacien_index", methods="GET")
      */
-    public function index(PharmacienRepository $pharmacienRepository): Response
+    public function indexPharmacienAction(PharmacienRepository $pharmacienRepository): Response
     {
-        return $this->render('pharmacien/index.html.twig', ['pharmaciens' => $pharmacienRepository->findAll()]);
+        $serializer = $this->get('jms_serializer');
+        $data = $serializer->serialize($pharmacienRepository->findAll(), 'json');
+        $response = new Response($data);
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
+
     }
 
     /**
-     * @Route("/new", name="pharmacien_new", methods="GET|POST")
+     * @Route("/new", name="pharmacien_new", methods="POST")
      */
-    public function new(Request $request): Response
+    public function newPharmacienAction(Request $request): Response
     {
-        $pharmacien = new Pharmacien();
-        $form = $this->createForm(PharmacienType::class, $pharmacien);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        try {
+            //On recupère les données depuis le formulaire
+            $data = $request->getContent();
+            //On les décodent
+            $pharmacien = $this->get('jms_serializer')->deserialize($data, 'App\Entity\Pharmacien', 'json');
+            //On insert les infos dans la database
             $em = $this->getDoctrine()->getManager();
             $em->persist($pharmacien);
             $em->flush();
-
-            return $this->redirectToRoute('pharmacien_index');
+            return new Response('', Response::HTTP_CREATED);
+        } catch (Excepttion $e) {
+            echo 'Exception reçue  : ',  $e->getMessage(), "\n";
         }
 
-        return $this->render('pharmacien/new.html.twig', [
-            'pharmacien' => $pharmacien,
-            'form' => $form->createView(),
-        ]);
     }
 
     /**
      * @Route("/{id}", name="pharmacien_show", methods="GET")
      */
-    public function show(Pharmacien $pharmacien): Response
+    public function showPharmacienAction(Pharmacien $pharmacien): Response
     {
-        return $this->render('pharmacien/show.html.twig', ['pharmacien' => $pharmacien]);
+        $serializer = $this->get('jms_serializer');
+        $data = $serializer->serialize($pharmacien, 'json');
+        $response = new Response($data);
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
     }
 
     /**
      * @Route("/{id}/edit", name="pharmacien_edit", methods="GET|POST")
      */
-    public function edit(Request $request, Pharmacien $pharmacien): Response
+    public function editPharmacienAction(Request $request, Pharmacien $pharmacien): Response
     {
         $form = $this->createForm(PharmacienType::class, $pharmacien);
         $form->handleRequest($request);
@@ -77,14 +84,12 @@ class PharmacienController extends AbstractController
     /**
      * @Route("/{id}", name="pharmacien_delete", methods="DELETE")
      */
-    public function delete(Request $request, Pharmacien $pharmacien): Response
+    public function deletePharmacienAction(Pharmacien $pharmacien): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$pharmacien->getId(), $request->request->get('_token'))) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($pharmacien);
             $em->flush();
-        }
+            return new Response("delete succès", Response::HTTP_ACCEPTED);
 
-        return $this->redirectToRoute('pharmacien_index');
     }
 }
