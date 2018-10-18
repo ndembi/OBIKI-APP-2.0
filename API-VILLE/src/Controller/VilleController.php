@@ -5,59 +5,67 @@ namespace App\Controller;
 use App\Entity\Ville;
 use App\Form\VilleType;
 use App\Repository\VilleRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
  * @Route("/ville")
  */
-class VilleController extends AbstractController
+class VilleController extends Controller
 {
     /**
      * @Route("/", name="ville_index", methods="GET")
      */
-    public function index(VilleRepository $villeRepository): Response
+    public function indexVilleAction(VilleRepository $villeRepository): Response
     {
-        return $this->render('ville/index.html.twig', ['villes' => $villeRepository->findAll()]);
+        $serializer = $this->get('jms_serializer');
+        $data = $serializer->serialize($villeRepository->findAll(), 'json');
+        $response = new Response($data);
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
+
     }
 
     /**
-     * @Route("/new", name="ville_new", methods="GET|POST")
+     * @Route("/new", name="ville_new", methods="POST")
      */
-    public function new(Request $request): Response
+    public function newVilleAction(Request $request): Response
     {
-        $ville = new Ville();
-        $form = $this->createForm(VilleType::class, $ville);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        try{
+            //On recupère les données depuis le formulaire
+            $data = $request->getContent();
+            //On les décodent
+            $ville = $this->get('jms_serializer')->deserialize($data, 'App\Entity\Ville', 'json');
+            //On insert les infos dans la database
             $em = $this->getDoctrine()->getManager();
             $em->persist($ville);
             $em->flush();
+            return new Response('', Response::HTTP_CREATED);
 
-            return $this->redirectToRoute('ville_index');
+        }catch(Excepttion $e){
+            echo 'Exception reçue  : ',  $e->getMessage(), "\n";
         }
 
-        return $this->render('ville/new.html.twig', [
-            'ville' => $ville,
-            'form' => $form->createView(),
-        ]);
     }
 
     /**
      * @Route("/{id}", name="ville_show", methods="GET")
      */
-    public function show(Ville $ville): Response
+    public function showVilleAction(Ville $ville): Response
     {
-        return $this->render('ville/show.html.twig', ['ville' => $ville]);
+        $serializer = $this->get('jms_serializer');
+        $data = $serializer->serialize($ville, 'json');
+        $response = new Response($data);
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
     }
 
     /**
      * @Route("/{id}/edit", name="ville_edit", methods="GET|POST")
      */
-    public function edit(Request $request, Ville $ville): Response
+    public function editVilleAction(Request $request, Ville $ville): Response
     {
         $form = $this->createForm(VilleType::class, $ville);
         $form->handleRequest($request);
@@ -77,14 +85,11 @@ class VilleController extends AbstractController
     /**
      * @Route("/{id}", name="ville_delete", methods="DELETE")
      */
-    public function delete(Request $request, Ville $ville): Response
+    public function deleteVilleAction(Ville $ville): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$ville->getId(), $request->request->get('_token'))) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($ville);
             $em->flush();
-        }
-
-        return $this->redirectToRoute('ville_index');
+            return new Response("delete succès",Response::HTTP_ACCEPTED);
     }
 }
