@@ -24,6 +24,7 @@ class PharmacienController extends Controller
         $data = $serializer->serialize($pharmacienRepository->findAll(), 'json');
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
+		$response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
 
     }
@@ -58,6 +59,7 @@ class PharmacienController extends Controller
         $data = $serializer->serialize($pharmacien, 'json');
         $response = new Response($data);
         $response->headers->set('Content-Type', 'application/json');
+		$response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
     }
 
